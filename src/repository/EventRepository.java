@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Repositori data access untuk persistensi entitas Event menggunakan JDBC standar.
+ * repositori data access untuk persistensi entitas Event menggunakan JDBC standar.
  */
 public class EventRepository {
 
