@@ -6,6 +6,10 @@ out/
 
 # Personal
 personal/
+postman/
+.postman
+bin/
+mise.toml
 
 # compiled
 *.class
