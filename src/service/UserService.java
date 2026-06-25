@@ -66,9 +66,9 @@ public class UserService {
     }
 
     private Map<String, Object> getBuyerSummary(String buyerId) throws SQLException {
-        String sql = "SELECT COUNT(*) AS total_tickets, COALESCE(SUM(t.price), 0) AS total_spending "
+        String sql = "SELECT COUNT(*) AS total_tickets, COALESCE(SUM(t.total_price), 0) AS total_spending "
                    + "FROM tickets t "
-                   + "WHERE t.buyer_id = ? AND t.status != 'refunded'";
+                   + "WHERE t.user_id = ? AND t.status != 'refunded'";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -89,7 +89,7 @@ public class UserService {
 
     private Map<String, Object> getOrganizerSummary(String organizerId) throws SQLException {
         String sqlEvents = "SELECT COUNT(*) AS total_events FROM events WHERE organizer_id = ?";
-        String sqlRevenue = "SELECT COALESCE(SUM(t.price), 0) AS total_revenue "
+        String sqlRevenue = "SELECT COALESCE(SUM(t.total_price), 0) AS total_revenue "
                           + "FROM tickets t "
                           + "JOIN events e ON t.event_id = e.id "
                           + "WHERE e.organizer_id = ? AND t.status != 'refunded'";

@@ -29,8 +29,8 @@ public class EventRepository {
         PreparedStatement psEvent = null;
         PreparedStatement psCapacity = null;
 
-        String queryInsertEvent = "INSERT INTO events (id, type, name, venue_id, organizer_id, date, base_price, is_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        String queryInsertCapacity = "INSERT INTO capacities (event_id, category, total_capacity) VALUES (?, ?, ?)";
+        String queryInsertEvent = "INSERT INTO events (id, type, name, venue_id, organizer_id, date, base_price) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String queryInsertCapacity = "INSERT INTO capacities (event_id, category, total) VALUES (?, ?, ?)";
 
         try {
             conn = DatabaseManager.getConnection();
@@ -157,7 +157,6 @@ public class EventRepository {
         ps.setString(5, event.getOrganizerId());
         ps.setString(6, event.getDate());
         ps.setDouble(7, event.getBasePrice());
-        ps.setInt(8, event.isPublished() ? 1 : 0);
     }
 
     private void executeBatchCapacityInsert(PreparedStatement ps, String eventId, Map<String, Integer> capacities) throws SQLException {
@@ -186,7 +185,6 @@ public class EventRepository {
         event.setOrganizerId(rs.getString("organizer_id"));
         event.setDate(rs.getString("date"));
         event.setBasePrice(rs.getDouble("base_price"));
-        event.setPublished(rs.getInt("is_published") == 1);
     }
 
     private Map<String, Integer> findCapacitiesByEventId(String eventId) throws SQLException {
@@ -195,7 +193,7 @@ public class EventRepository {
         ResultSet rs = null;
         Map<String, Integer> parsedCapacities = new HashMap<String, Integer>();
 
-        String queryLoadCapacity = "SELECT category, total_capacity FROM capacities WHERE event_id = ?";
+        String queryLoadCapacity = "SELECT category, total FROM capacities WHERE event_id = ?";
 
         try {
             conn = DatabaseManager.getConnection();
@@ -204,7 +202,7 @@ public class EventRepository {
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                parsedCapacities.put(rs.getString("category"), rs.getInt("total_capacity"));
+                parsedCapacities.put(rs.getString("category"), rs.getInt("total"));
             }
         } finally {
             this.closeResultSetResource(rs);
@@ -212,6 +210,36 @@ public class EventRepository {
             this.closeConnectionResource(conn);
         }
         return parsedCapacities;
+    }
+
+    public void update(Event event) throws SQLException {
+        if (event == null) { return; }
+        String sql = "UPDATE events SET name = ?, date = ?, base_price = ? WHERE id = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, event.getName());
+            ps.setString(2, event.getDate());
+            ps.setDouble(3, event.getBasePrice());
+            ps.setString(4, event.getId());
+            ps.executeUpdate();
+        }
+    }
+
+    public Map<String, Integer> findRemainingCapacities(String eventId) throws SQLException {
+        Map<String, Integer> remaining = new HashMap<String, Integer>();
+        String sql = "SELECT category, total, filled FROM capacities WHERE event_id = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, eventId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int total = rs.getInt("total");
+                    int filled = rs.getInt("filled");
+                    remaining.put(rs.getString("category"), total - filled);
+                }
+            }
+        }
+        return remaining;
     }
 
     private void closeConnectionResource(Connection connection) {

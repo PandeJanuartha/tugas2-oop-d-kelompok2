@@ -7,7 +7,7 @@ import model.SportMatch;
 import server.Request;
 import server.Response;
 import service.EventService;
-import service.EventConflictException;
+import exception.EventConflictException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,9 +22,181 @@ import java.util.UUID;
 public class EventHandler {
     
     private final EventService eventService;
+    private final repository.VenueRepository venueRepository = new repository.VenueRepository();
+    private final repository.UserRepository userRepository = new repository.UserRepository();
 
     public EventHandler(EventService eventService) {
         this.eventService = eventService;
+    }
+
+    public void getAll(Request req, Response res) {
+        if (req == null || res == null) { return; }
+        try {
+            String type = req.getQueryParam("type");
+            String dateFrom = req.getQueryParam("dateFrom");
+
+            List<Event> events = this.eventService.getAllEvents(type, dateFrom);
+            List<Map<String, Object>> responsePayload = new ArrayList<>();
+
+            for (Event e : events) {
+                model.Venue venue = venueRepository.findById(e.getVenueId());
+                model.User organizer = userRepository.findById(e.getOrganizerId());
+
+                Map<String, Object> eventMap = new LinkedHashMap<>();
+                eventMap.put("id", e.getId());
+                eventMap.put("type", e.getType());
+                eventMap.put("name", e.getName());
+
+                Map<String, Object> venueMap = new LinkedHashMap<>();
+                if (venue != null) {
+                    venueMap.put("id", venue.getId());
+                    venueMap.put("name", venue.getName());
+                } else {
+                    venueMap.put("id", e.getVenueId());
+                    venueMap.put("name", "Unknown Venue");
+                }
+                eventMap.put("venue", venueMap);
+
+                Map<String, Object> organizerMap = new LinkedHashMap<>();
+                if (organizer != null) {
+                    organizerMap.put("id", organizer.getId());
+                    organizerMap.put("name", organizer.getName());
+                } else {
+                    organizerMap.put("id", e.getOrganizerId());
+                    organizerMap.put("name", "Unknown Organizer");
+                }
+                eventMap.put("organizer", organizerMap);
+
+                eventMap.put("date", e.getDate());
+                eventMap.put("basePrice", e.getBasePrice());
+                eventMap.put("priceList", this.extractPolymorphicPrices(e));
+
+                Map<String, Integer> remaining = this.eventService.getRemainingCapacities(e.getId());
+                eventMap.put("remainingCapacity", remaining);
+
+                if (e instanceof model.Refundable) {
+                    eventMap.put("refundable", true);
+                } else {
+                    eventMap.put("refundable", false);
+                }
+
+                responsePayload.add(eventMap);
+            }
+
+            res.sendSuccess(responsePayload);
+        } catch (SQLException ex) {
+            res.sendError(500, "Database Error: " + ex.getMessage());
+        } catch (Exception ex) {
+            res.sendError(500, "Internal Server Error: " + ex.getMessage());
+        }
+    }
+
+    public void getById(Request req, Response res) {
+        if (req == null || res == null) { return; }
+        String id = req.getPathParam("id");
+        try {
+            Event e = this.eventService.getEventById(id);
+            if (e == null) {
+                res.sendError(404, "Event dengan id '" + id + "' tidak ditemukan.");
+                return;
+            }
+
+            model.Venue venue = venueRepository.findById(e.getVenueId());
+            model.User organizer = userRepository.findById(e.getOrganizerId());
+
+            Map<String, Object> eventDetail = new LinkedHashMap<>();
+            eventDetail.put("id", e.getId());
+            eventDetail.put("type", e.getType());
+            eventDetail.put("name", e.getName());
+
+            Map<String, Object> venueMap = new LinkedHashMap<>();
+            if (venue != null) {
+                venueMap.put("id", venue.getId());
+                venueMap.put("name", venue.getName());
+            } else {
+                venueMap.put("id", e.getVenueId());
+                venueMap.put("name", "Unknown Venue");
+            }
+            eventDetail.put("venue", venueMap);
+
+            Map<String, Object> organizerMap = new LinkedHashMap<>();
+            if (organizer != null) {
+                organizerMap.put("id", organizer.getId());
+                organizerMap.put("name", organizer.getName());
+            } else {
+                organizerMap.put("id", e.getOrganizerId());
+                organizerMap.put("name", "Unknown Organizer");
+            }
+            eventDetail.put("organizer", organizerMap);
+
+            eventDetail.put("date", e.getDate());
+            eventDetail.put("basePrice", e.getBasePrice());
+            eventDetail.put("priceList", this.extractPolymorphicPrices(e));
+
+            Map<String, Integer> remaining = this.eventService.getRemainingCapacities(id);
+            eventDetail.put("remainingCapacity", remaining);
+
+            if (e instanceof model.Refundable) {
+                eventDetail.put("refundable", true);
+                if (e instanceof model.Concert) {
+                    eventDetail.put("refundPolicy", "100% if >14 days, 50% if 7-14 days, 0% if <7 days");
+                } else if (e instanceof model.Seminar) {
+                    eventDetail.put("refundPolicy", "100% if >1 days, 0% if <=1 days");
+                }
+            } else {
+                eventDetail.put("refundable", false);
+            }
+
+            res.sendSuccess(eventDetail);
+
+        } catch (SQLException ex) {
+            res.sendError(500, "Database Error: " + ex.getMessage());
+        } catch (Exception ex) {
+            res.sendError(500, "Internal Server Error: " + ex.getMessage());
+        }
+    }
+
+    public void update(Request req, Response res) {
+        if (req == null || res == null) { return; }
+        String id = req.getPathParam("id");
+        try {
+            Map<String, Object> requestBody = req.getJSON();
+            if (requestBody == null) {
+                res.sendError(400, "Payload data tidak boleh kosong.");
+                return;
+            }
+
+            Event existing = this.eventService.getEventById(id);
+            if (existing == null) {
+                res.sendError(404, "Event dengan id '" + id + "' tidak ditemukan.");
+                return;
+            }
+
+            Event tempEvent = resolveEventInstanceFromType(existing.getType());
+            tempEvent.setId(id);
+            tempEvent.setName((String) requestBody.get("name"));
+            tempEvent.setDate((String) requestBody.get("date"));
+            if (requestBody.get("basePrice") != null) {
+                tempEvent.setBasePrice(((Number) requestBody.get("basePrice")).doubleValue());
+            } else {
+                tempEvent.setBasePrice(-1.0);
+            }
+
+            Event updated = this.eventService.updateEvent(id, tempEvent);
+            if (updated == null) {
+                res.sendError(404, "Event dengan id '" + id + "' tidak ditemukan.");
+                return;
+            }
+
+            res.sendSuccess(updated);
+
+        } catch (EventConflictException ex) {
+            res.sendError(400, ex.getMessage());
+        } catch (SQLException ex) {
+            res.sendError(500, "Database Error: " + ex.getMessage());
+        } catch (Exception ex) {
+            res.sendError(500, "Internal Server Error: " + ex.getMessage());
+        }
     }
 
     public void getPriceSummary(Request req, Response res) {

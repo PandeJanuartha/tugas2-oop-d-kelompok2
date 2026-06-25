@@ -1,4 +1,4 @@
-package service;
+package exception;
 
 /**
  * Custom Exception pendukung pelaporan kegagalan bentrok lokasi pengerjaan event.
