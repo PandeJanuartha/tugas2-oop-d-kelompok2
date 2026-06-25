@@ -83,30 +83,30 @@ public class DatabaseManager {
             );
 
             stmt.execute(
-                "CREATE TABLE IF NOT EXISTS events ("
-                + "  id TEXT PRIMARY KEY,"
-                + "  type TEXT NOT NULL,"
-                + "  name TEXT NOT NULL,"
-                + "  venue_id TEXT NOT NULL,"
-                + "  organizer_id TEXT NOT NULL,"
-                + "  date TEXT NOT NULL,"
-                + "  base_price REAL NOT NULL,"
-                + "  created_at TEXT DEFAULT (datetime('now')),"
-                + "  FOREIGN KEY (venue_id) REFERENCES venues(id),"
-                + "  FOREIGN KEY (organizer_id) REFERENCES users(id)"
-                + ")"
-            );
+                 "CREATE TABLE IF NOT EXISTS events ("
+                 + "  id TEXT PRIMARY KEY,"
+                 + "  type TEXT NOT NULL,"
+                 + "  name TEXT NOT NULL,"
+                 + "  venue_id TEXT NOT NULL,"
+                 + "  organizer_id TEXT NOT NULL,"
+                 + "  date TEXT NOT NULL,"
+                 + "  base_price REAL NOT NULL,"
+                 + "  created_at TEXT DEFAULT (datetime('now')),"
+                 + "  FOREIGN KEY (venue_id) REFERENCES venues(id),"
+                 + "  FOREIGN KEY (organizer_id) REFERENCES users(id)"
+                 + ")"
+             );
 
-            stmt.execute(
-                "CREATE TABLE IF NOT EXISTS capacities ("
-                + "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + "  event_id TEXT NOT NULL,"
-                + "  category TEXT NOT NULL,"
-                + "  total INTEGER NOT NULL,"
-                + "  filled INTEGER DEFAULT 0,"
-                + "  FOREIGN KEY (event_id) REFERENCES events(id)"
-                + ")"
-            );
+             stmt.execute(
+                 "CREATE TABLE IF NOT EXISTS capacities ("
+                 + "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                 + "  event_id TEXT NOT NULL,"
+                 + "  category TEXT NOT NULL,"
+                 + "  total INTEGER NOT NULL,"
+                 + "  filled INTEGER DEFAULT 0,"
+                 + "  FOREIGN KEY (event_id) REFERENCES events(id)"
+                 + ")"
+             );
 
             stmt.execute(
                 "CREATE TABLE IF NOT EXISTS tickets ("
