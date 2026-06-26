@@ -238,7 +238,6 @@ Arsitektur aplikasi menerapkan struktur berlapis (*layered*) untuk menjaga prins
 ```
 tugas2-oop-d-kelompok2/
 ├── lib/                                  # Dependensi (SQLite JDBC & Jackson)
-├── docs/                                 # Dokumentasi pendukung 
 ├── postman/
 │   └── collections/
 │       └── Testing API/                  # File koleksi Postman
