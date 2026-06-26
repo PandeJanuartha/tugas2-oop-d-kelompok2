@@ -1,0 +1,5 @@
+$kind: http-request
+name: Ambil Semua Event
+url: http://localhost:8080/api/events
+method: GET
+order: 2915708552583793

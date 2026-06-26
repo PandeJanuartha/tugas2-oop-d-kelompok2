@@ -1,0 +1,5 @@
+$kind: http-request
+name: Ambil Semua User
+url: http://localhost:8080/api/users
+method: GET
+order: 2939922301083991

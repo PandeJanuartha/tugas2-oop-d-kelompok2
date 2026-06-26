@@ -1,0 +1,4 @@
+$kind: http-request
+url: "http://localhost:8080/api/tickets/TKT-002/refund "
+method: PUT
+order: 4502839404154061

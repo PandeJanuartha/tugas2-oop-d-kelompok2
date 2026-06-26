@@ -18,7 +18,13 @@ public class UserRepository {
             stmt.setString(3, user.getEmail());
             stmt.setString(4, user.getPhone());
             stmt.setString(5, user.getRole());
-            stmt.setTimestamp(6, user.getCreatedAt());
+            // Simpan sebagai string ISO agar SQLite bisa baca balik tanpa error parsing
+            String createdAtStr = user.getCreatedAt() != null
+                ? new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .format(user.getCreatedAt())
+                : new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .format(new java.util.Date());
+            stmt.setString(6, createdAtStr);
             stmt.executeUpdate();
         }
     }
@@ -71,14 +77,60 @@ public class UserRepository {
         }
     }
 
+    public String generateNextId() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM users";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            int count = rs.next() ? rs.getInt(1) : 0;
+            return String.format("USR-%03d", count + 1);
+        }
+    }
+
     private User mapRow(ResultSet rs) throws SQLException {
+        String phoneVal = rs.getString("phone");
+        if (phoneVal != null && phoneVal.startsWith("'") && phoneVal.endsWith("'") && phoneVal.length() >= 2) {
+            phoneVal = phoneVal.substring(1, phoneVal.length() - 1);
+        }
+
         return new User(
             rs.getString("id"),
             rs.getString("name"),
             rs.getString("email"),
-            rs.getString("phone"),
+            phoneVal,
             rs.getString("role"),
-            rs.getTimestamp("created_at")
+            parseTimestamp(rs.getString("created_at"))
         );
+    }
+
+    private Timestamp parseTimestamp(String val) {
+        if (val == null || val.trim().isEmpty()) {
+            return null;
+        }
+        val = val.trim();
+        if (val.startsWith("'") && val.endsWith("'") && val.length() >= 2) {
+            val = val.substring(1, val.length() - 1);
+        }
+        if (val.matches("\\d+")) {
+            try {
+                return new Timestamp(Long.parseLong(val));
+            } catch (NumberFormatException e) {
+                // fall through
+            }
+        }
+        try {
+            return Timestamp.valueOf(val);
+        } catch (IllegalArgumentException e) {
+            try {
+                String normalized = val.replace("T", " ");
+                if (val.contains("Z") || val.contains("+") || (val.lastIndexOf("-") > 10)) {
+                    java.time.Instant instant = java.time.Instant.parse(val);
+                    return Timestamp.from(instant);
+                }
+                return Timestamp.valueOf(normalized);
+            } catch (Exception ex) {
+                return new Timestamp(System.currentTimeMillis());
+            }
+        }
     }
 }

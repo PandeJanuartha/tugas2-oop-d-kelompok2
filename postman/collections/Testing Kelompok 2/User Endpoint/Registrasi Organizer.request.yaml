@@ -1,0 +1,14 @@
+$kind: http-request
+name: Registrasi Organizer
+url: http://localhost:8080/api/users
+method: POST
+body:
+  type: json
+  content: |
+    {
+      "name": "Bali Event Organizer",
+      "email": "info@balievent.id",
+      "phone": "081987654321",
+      "role": "organizer"
+    }
+order: 1834521725128267

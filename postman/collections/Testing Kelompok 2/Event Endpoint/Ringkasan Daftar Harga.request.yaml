@@ -1,0 +1,5 @@
+$kind: http-request
+name: Ringkasan Daftar Harga
+url: http://localhost:8080/api/events/price-summary
+method: GET
+order: 4498656346209417

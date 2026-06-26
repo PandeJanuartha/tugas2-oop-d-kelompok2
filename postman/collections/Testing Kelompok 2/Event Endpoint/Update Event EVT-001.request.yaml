@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Event EVT-001
+url: http://localhost:8080/api/events/EVT-001
+method: PUT
+body:
+  type: json
+  content: |
+    {
+      "name": "Bali Music Fest 2026 - Day 1",
+      "basePrice": 300000
+    }
+order: 4495018515948834

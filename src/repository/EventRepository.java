@@ -242,6 +242,16 @@ public class EventRepository {
         return remaining;
     }
 
+    public String generateNextId() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM events";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            int count = rs.next() ? rs.getInt(1) : 0;
+            return String.format("EVT-%03d", count + 1);
+        }
+    }
+
     private void closeConnectionResource(Connection connection) {
         if (connection != null) {
             try { connection.close(); } catch (SQLException e) { /* Logging Suppressed */ }

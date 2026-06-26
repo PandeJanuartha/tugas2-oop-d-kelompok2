@@ -1,0 +1,20 @@
+$kind: http-request
+url: http://localhost:8080/api/events
+method: POST
+body:
+  type: json
+  content: |
+    {
+      "type": "concert",
+      "name": "Bali Music Festival 2026",
+      "venueId": "VNU-001",
+      "organizerId": "USR-002",
+      "date": "2026-08-15",
+      "basePrice": 250000,
+      "capacity": {
+        "vip": 100,
+        "regular": 500,
+        "festival": 1000
+      }
+    }
+order: 1782418394361

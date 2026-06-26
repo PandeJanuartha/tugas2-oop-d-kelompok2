@@ -1,0 +1,21 @@
+$kind: http-request
+name: Registrasi Event Seminar
+url: http://localhost:8080/api/events
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "type": "seminar",
+      "name": "Tech Talk: Future of AI",
+      "venueId": "VNU-001",
+      "organizerId": "USR-002",
+      "date": "2026-09-10",
+      "basePrice": 100000,
+      "capacity": {
+        "vip": 50,
+        "regular": 200
+      },
+      "refundable": true
+    }
+order: 4503444491836469

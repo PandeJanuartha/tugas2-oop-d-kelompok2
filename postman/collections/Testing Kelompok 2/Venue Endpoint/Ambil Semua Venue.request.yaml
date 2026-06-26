@@ -1,0 +1,5 @@
+$kind: http-request
+name: Ambil Semua Venue
+url: http://localhost:8080/api/venues
+method: GET
+order: 1748897211055632

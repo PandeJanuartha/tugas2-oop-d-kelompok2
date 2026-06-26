@@ -1,0 +1,7 @@
+$kind: http-request
+name: Laporan Penjualan EVT-001
+url: http://localhost:8080/api/reports/sales?eventId=EVT-001
+method: GET
+queryParams:
+  eventId: EVT-001
+order: 4253438627129042

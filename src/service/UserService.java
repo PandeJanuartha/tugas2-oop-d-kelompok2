@@ -24,7 +24,7 @@ public class UserService {
         validateUserFields(user);
 
         if (user.getId() == null || user.getId().isEmpty()) {
-            user.setId(UUID.randomUUID().toString());
+            user.setId(userRepository.generateNextId());
         }
         if (user.getCreatedAt() == null) {
             user.setCreatedAt(new Timestamp(System.currentTimeMillis()));

@@ -74,18 +74,15 @@ public class TicketRepository {
         return tickets;
     }
 
-    // Simpan transaksi tiket
-    public boolean save(Ticket ticket) {
-
+    // Simpan transaksi tiket (dengan connection eksisting untuk transaksi)
+    public boolean save(Connection conn, Ticket ticket) throws SQLException {
         String sql = "INSERT INTO tickets "
                 + "(id, event_id, user_id, category, quantity, "
                 + " unit_price, total_price, purchase_date, "
                 + " status, refund_amount) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, ticket.getId());
             ps.setString(2, ticket.getEventId());
             ps.setString(3, ticket.getUserId());
@@ -98,34 +95,39 @@ public class TicketRepository {
             ps.setDouble(10, ticket.getRefundAmount());
 
             return ps.executeUpdate() > 0;
+        }
+    }
 
+    public boolean save(Ticket ticket) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            return save(conn, ticket);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return false;
     }
 
-    // Update status refund
-    public boolean updateStatus(String id, String status, double refundAmount) {
-
+    // Update status refund (dengan connection eksisting untuk transaksi)
+    public boolean updateStatus(Connection conn, String id, String status, double refundAmount) throws SQLException {
         String sql = "UPDATE tickets "
                 + "SET status = ?, refund_amount = ? "
                 + "WHERE id = ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setDouble(2, refundAmount);
             ps.setString(3, id);
 
             return ps.executeUpdate() > 0;
+        }
+    }
 
+    public boolean updateStatus(String id, String status, double refundAmount) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            return updateStatus(conn, id, status, refundAmount);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return false;
     }
 
@@ -144,5 +146,14 @@ public class TicketRepository {
                 rs.getString("status"),
                 rs.getDouble("refund_amount")
         );
+    }
+    public String generateNextId() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM tickets";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            int count = rs.next() ? rs.getInt(1) : 0;
+            return String.format("TKT-%03d", count + 1);
+        }
     }
 }

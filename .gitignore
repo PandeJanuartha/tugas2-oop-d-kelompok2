@@ -8,8 +8,7 @@ out/
 personal/
 mise.toml
 bin/
-postman/
-.postman
+docs/
 
 # compiled
 *.class

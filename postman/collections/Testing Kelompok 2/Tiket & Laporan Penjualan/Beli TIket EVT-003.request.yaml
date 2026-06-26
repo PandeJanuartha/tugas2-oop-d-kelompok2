@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://localhost:8080/api/tickets
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "eventId": "EVT-003",
+      "userId": "USR-001",
+      "category": "vvip",
+      "quantity": 1
+    }
+order: 4495724228045326

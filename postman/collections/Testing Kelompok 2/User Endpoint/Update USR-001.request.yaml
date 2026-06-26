@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update USR-001
+url: http://localhost:8080/api/users/USR-001
+method: PUT
+body:
+  type: json
+  content: |
+    {
+      "name": "Kadek Surya Wibawa",
+      "email": "kadek.surya.new@email.com"
+    }
+order: 4014497394254205

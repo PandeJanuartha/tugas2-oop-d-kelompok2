@@ -1,0 +1,13 @@
+$kind: http-request
+name: Registrasi Venue
+url: http://localhost:8080/api/venues
+method: POST
+body:
+  type: json
+  content: |
+    {
+      "name": "GWK Cultural Park",
+      "address": "Jl. Raya Uluwatu, Ungasan, Bali",
+      "maxCapacity": 8000
+    }
+order: 1782418012858

@@ -1,0 +1,5 @@
+$kind: http-request
+name: Ambl Detail Event EVT-001
+url: http://localhost:8080/api/events/EVT-001
+method: GET
+order: 4424377804147781

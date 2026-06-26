@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Venue VNU-001
+url: http://localhost:8080/api/venues/VNU-001
+method: PUT
+body:
+  type: json
+  content: |
+    {
+      "name": "GWK Cultural Park - Main Amphitheatre",
+      "maxCapacity": 10000
+    }
+order: 3617080977874571

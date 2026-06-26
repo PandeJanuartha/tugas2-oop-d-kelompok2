@@ -1,0 +1,22 @@
+$kind: http-request
+name: Registrasi Event Sportmatch
+url: http://localhost:8080/api/events
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "type": "sport_match",
+      "name": "Bali United vs Persija",
+      "venueId": "VNU-001",
+      "organizerId": "USR-002",
+      "date": "2026-07-20",
+      "basePrice": 50000,
+      "capacity": {
+        "tribune": 5000,
+        "vip": 200,
+        "vvip": 50
+      },
+      "refundable": false
+    }
+order: 4503542255670482

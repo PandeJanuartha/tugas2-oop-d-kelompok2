@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://localhost:8080/api/users
+method: POST
+body:
+  type: json
+  content: |
+    {
+      "name": "Kadek Surya",
+      "email": "kadek.surya@email.com",
+      "phone": "081234567890",
+      "role": "buyer"
+    }
+order: 1782417983664

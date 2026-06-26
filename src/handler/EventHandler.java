@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * HTTP Handler untuk memproses rute masuk /api/events/* secara polimorfik.
@@ -24,6 +23,7 @@ public class EventHandler {
     private final EventService eventService;
     private final repository.VenueRepository venueRepository = new repository.VenueRepository();
     private final repository.UserRepository userRepository = new repository.UserRepository();
+    private final repository.EventRepository eventRepository = new repository.EventRepository();
 
     public EventHandler(EventService eventService) {
         this.eventService = eventService;
@@ -293,8 +293,13 @@ public class EventHandler {
 
     @SuppressWarnings("unchecked")
     private void bindJsonPayloadToEvent(Event event, Map<String, Object> body) {
-        String generatedId = "EVT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        event.setId(generatedId);
+        try {
+            String generatedId = eventRepository.generateNextId();
+            event.setId(generatedId);
+        } catch (SQLException e) {
+            // fallback ke format EVT- + timestamp jika DB error
+            event.setId("EVT-" + System.currentTimeMillis());
+        }
         event.setName((String) body.get("name"));
         event.setVenueId((String) body.get("venueId"));
         event.setOrganizerId((String) body.get("organizerId"));

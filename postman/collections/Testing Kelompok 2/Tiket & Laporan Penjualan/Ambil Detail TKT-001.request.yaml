@@ -1,0 +1,5 @@
+$kind: http-request
+name: Ambil Detail TKT-001
+url: http://localhost:8080/api/tickets/TKT-001
+method: GET
+order: 4064247629268699

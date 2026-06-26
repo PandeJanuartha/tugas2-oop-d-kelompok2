@@ -1,0 +1,5 @@
+$kind: http-request
+name: Ambil Semua Pembelian Tiket
+url: http://localhost:8080/api/tickets
+method: GET
+order: 1443356464107836

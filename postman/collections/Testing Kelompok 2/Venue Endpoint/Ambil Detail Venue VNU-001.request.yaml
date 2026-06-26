@@ -1,0 +1,5 @@
+$kind: http-request
+name: Ambil Detail Venue VNU-001
+url: http://localhost:8080/api/venues/VNU-001
+method: GET
+order: 3299269976070817

@@ -1,0 +1,5 @@
+$kind: http-request
+name: Ambil Detail User USR-001
+url: http://localhost:8080/api/users/USR-001
+method: GET
+order: 4004892611700009

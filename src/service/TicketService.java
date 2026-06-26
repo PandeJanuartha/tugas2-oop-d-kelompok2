@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Service layer untuk logika transaksi tiket.
@@ -110,7 +109,7 @@ public class TicketService {
                 double totalPrice = unitPrice * quantity;
 
                 // 4. Buat objek tiket
-                String ticketId = "TKT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+                String ticketId = ticketRepository.generateNextId();
                 String purchaseDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
                 Ticket ticket = new Ticket(
@@ -127,7 +126,7 @@ public class TicketService {
                 );
 
                 // 5. Simpan tiket
-                ticketRepository.save(ticket);
+                ticketRepository.save(conn, ticket);
 
                 // 6. Update filled di tabel capacities
                 updateFilledCapacity(conn, eventId, category, quantity);
@@ -214,7 +213,7 @@ public class TicketService {
             conn.setAutoCommit(false);
             try {
                 // Update tiket ke status refunded
-                ticketRepository.updateStatus(ticketId, "refunded", refundAmount);
+                ticketRepository.updateStatus(conn, ticketId, "refunded", refundAmount);
 
                 // Kembalikan kuota (kurangi filled)
                 restoreCapacity(conn, ticket.getEventId(), ticket.getCategory(), ticket.getQuantity());
